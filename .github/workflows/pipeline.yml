@@ -1,61 +1,23 @@
-name: Pipeline CI/CD - GitHub Pages
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Instalar Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
 
       - name: Instalar dependencias
         run: npm install
 
-      - name: Verificar proyecto
+      - name: Verificar código
         run: npm run check
 
-      - name: Construir proyecto
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}
+      - name: Build del proyecto
         run: npm run build
-
-      - name: Subir artefacto de Pages
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: build
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Desplegar en GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
